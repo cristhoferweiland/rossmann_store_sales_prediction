@@ -27,14 +27,14 @@ def send_message( chat_id, text ):
 
 def load_dataset( store_id ):
     # loading test dataset
-    df10 = pd.read_csv( 'test.csv')
+    df10 = pd.read_csv( 'test.csv' )
     df_store_raw = pd.read_csv( 'store.csv' )
 
     # merge test dataset + store
-    df_test = pd.merge( df10, df_store_raw, how='left', on='Store')
+    df_test = pd.merge( df10, df_store_raw, how='left', on='Store' )
 
     # choose store for prediction
-    df_test = df_test[df_test['Store'] == store_id ]
+    df_test = df_test[df_test['Store'] == store_id]
 
     if not df_test.empty:
         # remove closed days
@@ -70,8 +70,11 @@ def parse_message( message ):
 
     try:
         store_id = int( store_id )
+    
     except ValueError:
         store_id = 'error'
+    
+    return chat_id, store_id
 
 # API initialize
 app = Flask( __name__)
@@ -80,6 +83,7 @@ app = Flask( __name__)
 def index():
     if request.method == 'POST':
         message = request.get_json()
+        
         chat_id, store_id = parse_message( message )
         
         if store_id != 'error':
@@ -94,15 +98,14 @@ def index():
                 msg = f"Loja número {d2['store'].values[0]} venderá € {d2['prediction'].values[0]:,.2f} nas próximas 6 semanas."
                 send_message( chat_id, msg )
                 return Response( 'OK', status=200 )
-                
             else:
                 send_message( chat_id, 'Loja não Disponível')
                 return Response( 'OK', status=200 )
         else:
-            send_message( chat_id, 'O ID da Loja está errado.')
+            send_message( chat_id, 'Este não é um ID de Loja válido.')
             return Response( 'OK', status=200 )
     else:
-        return '<h1> Rossmann Telegram BOT </h1>'
+        return '<h1> Rossmann Pred Sales Telegram BOT </h1>'
 
 if __name__ == '__main__':
     port = os.environ.get( 'PORT', 5000 )
